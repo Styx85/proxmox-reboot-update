@@ -1,13 +1,13 @@
 {
   "domain": "proxmox_reboot_update",
   "name": "Proxmox Reboot Update",
-  "version": "1.0.0",
+  "codeowners": ["@Styx85"],
   "config_flow": true,
-  "single_config_entry": true,
+  "documentation": "https://github.com/Styx85/proxmox-reboot-update",
   "integration_type": "helper",
   "iot_class": "calculated",
-  "documentation": "https://github.com/Styx85/proxmox-reboot-update",
   "issue_tracker": "https://github.com/Styx85/proxmox-reboot-update/issues",
-  "codeowners": ["@Styx85"],
-  "requirements": []
+  "requirements": [],
+  "single_config_entry": true,
+  "version": "1.0.0"
 }
