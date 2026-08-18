@@ -1,44 +1,112 @@
 """Config flow for Proxmox Reboot Update."""
 
+from typing import Any
+
 import voluptuous as vol
 
 from homeassistant import config_entries
+from homeassistant.components.webhook import (
+    async_generate_id as webhook_generate_id,
+    async_generate_url as webhook_generate_url,
+)
+from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 
-from .const import CONF_REBOOT_BUTTON, CONF_SOURCE_ENTITY, DOMAIN
+from .const import CONF_REBOOT_BUTTON, CONF_WEBHOOK_ID, DOMAIN
 
 
-class ProxmoxRebootUpdateConfigFlow(
-    config_entries.ConfigFlow,
-    domain=DOMAIN,
-):
+class ProxmoxRebootUpdateConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Proxmox Reboot Update."""
 
-    VERSION = 1
+    VERSION = 2
 
-    async def async_step_user(self, user_input=None):
+    def __init__(self) -> None:
+        """Initialize the config flow."""
+        self._reboot_button: str | None = None
+        self._webhook_id: str | None = None
+
+    async def async_step_user(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> FlowResult:
         """Handle initial setup."""
         if user_input is not None:
             await self.async_set_unique_id(DOMAIN)
             self._abort_if_unique_id_configured()
 
-            return self.async_create_entry(
-                title="Proxmox Reboot Update",
-                data=user_input,
-            )
-
-        schema = vol.Schema(
-            {
-                vol.Required(CONF_SOURCE_ENTITY): selector.EntitySelector(
-                    selector.EntitySelectorConfig(domain="input_boolean")
-                ),
-                vol.Required(CONF_REBOOT_BUTTON): selector.EntitySelector(
-                    selector.EntitySelectorConfig(domain="button")
-                ),
-            }
-        )
+            self._reboot_button = user_input[CONF_REBOOT_BUTTON]
+            self._webhook_id = webhook_generate_id()
+            return await self.async_step_webhook()
 
         return self.async_show_form(
             step_id="user",
-            data_schema=schema,
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_REBOOT_BUTTON): selector.EntitySelector(
+                        selector.EntitySelectorConfig(domain="button")
+                    ),
+                }
+            ),
+        )
+
+    async def async_step_webhook(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> FlowResult:
+        """Show the generated webhook URL and finish setup."""
+        if self._reboot_button is None or self._webhook_id is None:
+            return self.async_abort(reason="setup_error")
+
+        webhook_url = webhook_generate_url(self.hass, self._webhook_id)
+
+        if user_input is not None:
+            return self.async_create_entry(
+                title="Proxmox Reboot Update",
+                data={
+                    CONF_REBOOT_BUTTON: self._reboot_button,
+                    CONF_WEBHOOK_ID: self._webhook_id,
+                },
+            )
+
+        return self.async_show_form(
+            step_id="webhook",
+            data_schema=vol.Schema({}),
+            description_placeholders={"webhook_url": webhook_url},
+        )
+
+    async def async_step_reconfigure(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> FlowResult:
+        """Reconfigure the integration and show its webhook URL."""
+        entry = self._get_reconfigure_entry()
+        webhook_id = entry.data[CONF_WEBHOOK_ID]
+        webhook_url = webhook_generate_url(self.hass, webhook_id)
+
+        if user_input is not None:
+            new_data = {
+                **entry.data,
+                CONF_REBOOT_BUTTON: user_input[CONF_REBOOT_BUTTON],
+            }
+            self.hass.config_entries.async_update_entry(entry, data=new_data)
+            self.hass.config_entries.async_schedule_reload(entry.entry_id)
+
+            return self.async_abort(
+                reason="reconfigure_successful",
+                description_placeholders={"webhook_url": webhook_url},
+            )
+
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        CONF_REBOOT_BUTTON,
+                        default=entry.data[CONF_REBOOT_BUTTON],
+                    ): selector.EntitySelector(
+                        selector.EntitySelectorConfig(domain="button")
+                    ),
+                }
+            ),
+            description_placeholders={"webhook_url": webhook_url},
         )

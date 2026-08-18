@@ -1,30 +1,22 @@
 """Update entity representing a pending Proxmox reboot."""
 
 from homeassistant.components.update import UpdateEntity, UpdateEntityFeature
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device import async_entity_id_to_device
+from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.event import async_track_state_change_event
 
-from .const import CONF_REBOOT_BUTTON, CONF_SOURCE_ENTITY
+from . import ProxmoxRebootConfigEntry
+from .const import CONF_REBOOT_BUTTON, SIGNAL_REBOOT_STATUS
 
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: ProxmoxRebootConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the Proxmox reboot update entity."""
-    async_add_entities(
-        [
-            ProxmoxRebootUpdate(
-                hass=hass,
-                source_entity=entry.data[CONF_SOURCE_ENTITY],
-                reboot_button=entry.data[CONF_REBOOT_BUTTON],
-            )
-        ]
-    )
+    async_add_entities([ProxmoxRebootUpdate(hass, entry)])
 
 
 class ProxmoxRebootUpdate(UpdateEntity):
@@ -42,60 +34,39 @@ class ProxmoxRebootUpdate(UpdateEntity):
     def __init__(
         self,
         hass: HomeAssistant,
-        source_entity: str,
-        reboot_button: str,
+        entry: ProxmoxRebootConfigEntry,
     ) -> None:
         """Initialize the entity."""
         self.hass = hass
-        self._source_entity = source_entity
-        self._reboot_button = reboot_button
+        self._entry = entry
+        self._reboot_button = entry.data[CONF_REBOOT_BUTTON]
 
         self.device_entry = async_entity_id_to_device(
             hass,
-            reboot_button,
+            self._reboot_button,
         )
 
-        self._required = False
-        self._source_available = False
-
     async def async_added_to_hass(self) -> None:
-        """Register the source-state listener."""
+        """Register the runtime-state listener."""
         await super().async_added_to_hass()
-        self._update_from_source()
 
         self.async_on_remove(
-            async_track_state_change_event(
+            async_dispatcher_connect(
                 self.hass,
-                [self._source_entity],
-                self._handle_source_change,
+                f"{SIGNAL_REBOOT_STATUS}_{self._entry.entry_id}",
+                self._handle_status_update,
             )
         )
 
     @callback
-    def _handle_source_change(self, event) -> None:
-        """Handle reboot status changes."""
-        self._update_from_source()
+    def _handle_status_update(self) -> None:
+        """Handle a reboot status update."""
         self.async_write_ha_state()
-
-    @callback
-    def _update_from_source(self) -> None:
-        """Read the reboot status from the configured helper."""
-        state = self.hass.states.get(self._source_entity)
-
-        self._source_available = (
-            state is not None
-            and state.state not in ("unknown", "unavailable")
-        )
-
-        self._required = (
-            self._source_available
-            and state.state == "on"
-        )
 
     @property
     def available(self) -> bool:
-        """Return entity availability."""
-        return self._source_available
+        """Return whether the Proxmox host has reported its status."""
+        return self._entry.runtime_data.status_received
 
     @property
     def installed_version(self) -> str:
@@ -105,12 +76,16 @@ class ProxmoxRebootUpdate(UpdateEntity):
     @property
     def latest_version(self) -> str:
         """Return a language-neutral state token."""
-        return "reboot_required" if self._required else "current"
+        if self._entry.runtime_data.reboot_required:
+            return "reboot_required"
+        return "current"
 
     @property
     def release_summary(self) -> str | None:
         """Return a warning token while a reboot is pending."""
-        return "reboot_warning" if self._required else None
+        if self._entry.runtime_data.reboot_required:
+            return "reboot_warning"
+        return None
 
     def version_is_newer(
         self,
@@ -118,7 +93,7 @@ class ProxmoxRebootUpdate(UpdateEntity):
         installed_version: str,
     ) -> bool:
         """Tell Home Assistant whether an update should be shown."""
-        return self._required
+        return self._entry.runtime_data.reboot_required
 
     async def async_install(
         self,
@@ -127,14 +102,12 @@ class ProxmoxRebootUpdate(UpdateEntity):
         **kwargs,
     ) -> None:
         """Use the configured Proxmox reboot button as the update action."""
-        if not self._required:
+        if not self._entry.runtime_data.reboot_required:
             return
 
         await self.hass.services.async_call(
             "button",
             "press",
-            {
-                "entity_id": self._reboot_button,
-            },
+            {"entity_id": self._reboot_button},
             blocking=True,
         )

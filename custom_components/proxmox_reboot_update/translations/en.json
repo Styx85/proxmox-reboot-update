@@ -4,12 +4,26 @@
     "step": {
       "user": {
         "title": "Proxmox Reboot Update",
-        "description": "Select the helper that reports whether the Proxmox host requires a reboot and the real Proxmox reboot button.",
+        "description": "Select the real Proxmox reboot button. The integration creates its own webhook for the reboot-required state.",
         "data": {
-          "source_entity": "Reboot status",
+          "reboot_button": "Proxmox reboot button"
+        }
+      },
+      "webhook": {
+        "title": "Proxmox webhook",
+        "description": "Configure the Proxmox status script to POST to:\n\n`{webhook_url}`\n\nThe JSON body must be `{\"required\": true}` or `{\"required\": false}`. Submit to finish setup."
+      },
+      "reconfigure": {
+        "title": "Reconfigure Proxmox Reboot Update",
+        "description": "Current webhook URL:\n\n`{webhook_url}`\n\nYou can also change the Proxmox reboot button.",
+        "data": {
           "reboot_button": "Proxmox reboot button"
         }
       }
+    },
+    "abort": {
+      "reconfigure_successful": "Reconfiguration was successful. Webhook URL:\n\n`{webhook_url}`",
+      "setup_error": "Setup state was lost. Please start setup again."
     }
   },
   "entity": {

@@ -5,11 +5,14 @@
     "@Styx85"
   ],
   "config_flow": true,
+  "dependencies": [
+    "webhook"
+  ],
   "documentation": "https://github.com/Styx85/proxmox-reboot-update",
   "integration_type": "helper",
-  "iot_class": "calculated",
+  "iot_class": "local_push",
   "issue_tracker": "https://github.com/Styx85/proxmox-reboot-update/issues",
   "requirements": [],
   "single_config_entry": true,
-  "version": "1.0.2"
+  "version": "1.1.0"
 }

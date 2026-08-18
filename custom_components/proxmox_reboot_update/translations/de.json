@@ -4,12 +4,26 @@
     "step": {
       "user": {
         "title": "Proxmox Reboot Update",
-        "description": "Wähle den Helfer, der meldet, ob der Proxmox-Host neu gestartet werden muss, und den echten Proxmox-Neustart-Button.",
+        "description": "Wähle den echten Proxmox-Neustart-Button. Die Integration erstellt selbst einen Webhook für den Neustartstatus.",
         "data": {
-          "source_entity": "Neustart-Status",
+          "reboot_button": "Proxmox-Neustart-Button"
+        }
+      },
+      "webhook": {
+        "title": "Proxmox-Webhook",
+        "description": "Konfiguriere das Proxmox-Statusskript so, dass es per POST an diese URL sendet:\n\n`{webhook_url}`\n\nDer JSON-Body muss `{\"required\": true}` oder `{\"required\": false}` enthalten. Mit Absenden wird die Einrichtung abgeschlossen."
+      },
+      "reconfigure": {
+        "title": "Proxmox Reboot Update neu konfigurieren",
+        "description": "Aktuelle Webhook-URL:\n\n`{webhook_url}`\n\nHier kannst du auch den Proxmox-Neustart-Button ändern.",
+        "data": {
           "reboot_button": "Proxmox-Neustart-Button"
         }
       }
+    },
+    "abort": {
+      "reconfigure_successful": "Die Neukonfiguration war erfolgreich. Webhook-URL:\n\n`{webhook_url}`",
+      "setup_error": "Der Einrichtungsstatus ging verloren. Bitte starte die Einrichtung erneut."
     }
   },
   "entity": {
@@ -30,7 +44,7 @@
           },
           "release_summary": {
             "state": {
-              "reboot_warning": "Proxmox wurde automatisch aktualisiert. Ein Neustart des Hosts ist erforderlich. Laufende virtuelle Maschinen und Container werden geordnet beendet. Der Host und die darauf laufenden Dienste können für mehrere Minuten nicht erreichbar sein."
+              "reboot_warning": "Proxmox wurde automatisch aktualisiert. Ein Neustart des Hosts ist erforderlich. Laufende virtuelle Maschinen und Container werden geordnet heruntergefahren. Der Host und darauf laufende Dienste können für mehrere Minuten nicht verfügbar sein."
             }
           }
         }

@@ -1,40 +1,27 @@
 # Proxmox Reboot Update
 
-A small Home Assistant custom integration that exposes a pending Proxmox VE host reboot as an `update` entity.
-
-It is intended for setups where Proxmox installs package updates automatically (for example with Debian `unattended-upgrades`) and Home Assistant should show a pending reboot in the same Updates section used for Home Assistant Core, add-ons, firmware, and other update entities.
+Home Assistant helper integration that exposes a pending Proxmox VE host reboot as a normal `update` entity.
 
 ## What it does
 
-- Reads an existing Home Assistant `input_boolean` that represents whether the Proxmox host requires a reboot.
-- Exposes the reboot requirement as a Home Assistant `update` entity.
-- Shows the pending reboot in Home Assistant's normal Updates UI.
-- Adds an action to the update entity.
-- When the action is pressed, the integration presses the configured Proxmox reboot `button` entity.
-- Warns that virtual machines, containers, the host, and hosted services may be unavailable for several minutes during the reboot.
-- Uses Home Assistant translations for user-facing entity and setup text. English is included as the fallback language; German is included as an additional translation.
+- Receives reboot status directly through its own Home Assistant webhook.
+- Shows a pending host reboot in Home Assistant's normal Updates UI.
+- Uses the selected Proxmox reboot button as the update action.
+- Links the update entity to the selected Proxmox device.
+- No `input_boolean` and no Home Assistant webhook automation are required.
 
-This integration does **not** detect the reboot requirement on the Proxmox host by itself. You provide the status through an `input_boolean`.
+## Setup
 
-## Requirements
+Install through HACS, restart Home Assistant, then add **Proxmox Reboot Update** under **Settings → Devices & services**.
 
-You need:
+Select the real Proxmox reboot button. The setup flow displays a generated webhook URL. You can retrieve it later with **Reconfigure**.
 
-1. Home Assistant with the Proxmox VE integration configured.
-2. A working Proxmox reboot `button` entity.
-3. An `input_boolean` that is `on` when `/var/run/reboot-required` exists on the Proxmox host.
-
-## Example: report reboot status from Proxmox
-
-One simple approach is a local Home Assistant webhook.
-
-Example script on the Proxmox host:
+## Proxmox status script
 
 ```bash
 #!/bin/bash
 
-HA_URL="http://homeassistant.example:8123"
-WEBHOOK_ID="replace-with-your-webhook-id"
+HA_WEBHOOK_URL="http://homeassistant.example:8123/api/webhook/GENERATED_ID"
 
 if [ -f /var/run/reboot-required ]; then
     REQUIRED=true
@@ -50,54 +37,16 @@ curl \
     -X POST \
     -H "Content-Type: application/json" \
     -d "{\"required\":${REQUIRED}}" \
-    "${HA_URL}/api/webhook/${WEBHOOK_ID}"
+    "${HA_WEBHOOK_URL}"
 ```
 
-The corresponding Home Assistant webhook automation should turn your selected `input_boolean` on or off.
+Run the script periodically, for example with a systemd timer.
 
-For reliability, run the reporting script periodically with a systemd timer and after boot.
+## Upgrading from 1.0.x
 
-## Installation with HACS
+Version 1.1 migrates existing configuration automatically. The configured Proxmox reboot button is retained, the old `input_boolean` source is removed, and a webhook ID is generated.
 
-Until this repository is included in the default HACS catalog:
-
-1. Open HACS.
-2. Open the menu and choose **Custom repositories**.
-3. Add this GitHub repository.
-4. Select category **Integration**.
-5. Install **Proxmox Reboot Update**.
-6. Restart Home Assistant.
-
-Then go to:
-
-**Settings → Devices & services → Add integration → Proxmox Reboot Update**
-
-Select:
-
-- the `input_boolean` that represents the reboot requirement;
-- the real Proxmox reboot `button` entity.
-
-## Manual installation
-
-Copy:
-
-```text
-custom_components/proxmox_reboot_update/
-```
-
-to:
-
-```text
-/config/custom_components/proxmox_reboot_update/
-```
-
-and restart Home Assistant.
-
-## Safety
-
-Pressing the update action triggers the configured reboot button. Depending on the Proxmox configuration, running VMs and containers may be stopped or restarted as part of the host reboot.
-
-Test your Proxmox shutdown/startup configuration before relying on this integration.
+After upgrading, use **Reconfigure** to retrieve the new webhook URL and put it into the Proxmox status script. Once the new webhook works, the old Home Assistant webhook automation and `input_boolean` can be removed.
 
 ## License
 
