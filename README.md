@@ -48,6 +48,10 @@ Version 1.1 migrates existing configuration automatically. The configured Proxmo
 
 After upgrading, use **Reconfigure** to retrieve the new webhook URL and put it into the Proxmox status script. Once the new webhook works, the old Home Assistant webhook automation and `input_boolean` can be removed.
 
+## Development
+
+This project was created with the help of ChatGPT by OpenAI, including assistance with architecture, implementation, documentation, and debugging. Final testing, review, and publication were performed by the repository maintainer.
+
 ## License
 
 MIT
