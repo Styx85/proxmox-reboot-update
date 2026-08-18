@@ -11,19 +11,23 @@
       },
       "webhook": {
         "title": "Proxmox webhook",
-        "description": "Configure the Proxmox status script to POST to:\n\n`{webhook_url}`\n\nSend the reboot-required state as JSON with the boolean field `required`. Submit to finish setup."
-      },
-      "reconfigure": {
-        "title": "Reconfigure Proxmox Reboot Update",
-        "description": "Current webhook URL:\n\n`{webhook_url}`\n\nYou can also change the Proxmox reboot button.",
+        "description": "Configure the Proxmox status script to POST to:\n\n`{webhook_url}`\n\nSend the reboot-required state as JSON using the boolean field `required`. Submit to finish setup."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Proxmox Reboot Update is already configured. Edit the existing helper to view the webhook URL or change the Proxmox reboot button.",
+      "setup_error": "Setup state was lost. Please start setup again."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Edit Proxmox Reboot Update",
+        "description": "Webhook URL:\n\n`{webhook_url}`\n\nUse this URL in the Proxmox status script. You can also change the Proxmox reboot button here.",
         "data": {
           "reboot_button": "Proxmox reboot button"
         }
       }
-    },
-    "abort": {
-      "reconfigure_successful": "Reconfiguration was successful. Webhook URL:\n\n`{webhook_url}`",
-      "setup_error": "Setup state was lost. Please start setup again."
     }
   },
   "entity": {

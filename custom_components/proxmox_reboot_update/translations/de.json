@@ -12,18 +12,22 @@
       "webhook": {
         "title": "Proxmox-Webhook",
         "description": "Konfiguriere das Proxmox-Statusskript so, dass es per POST an diese URL sendet:\n\n`{webhook_url}`\n\nSende den Neustartstatus als JSON mit dem booleschen Feld `required`. Mit Absenden wird die Einrichtung abgeschlossen."
-      },
-      "reconfigure": {
-        "title": "Proxmox Reboot Update neu konfigurieren",
-        "description": "Aktuelle Webhook-URL:\n\n`{webhook_url}`\n\nHier kannst du auch den Proxmox-Neustart-Button ändern.",
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Proxmox Reboot Update ist bereits eingerichtet. Bearbeite den bestehenden Helfer, um die Webhook-URL anzuzeigen oder den Proxmox-Neustart-Button zu ändern.",
+      "setup_error": "Der Einrichtungsstatus ging verloren. Bitte starte die Einrichtung erneut."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Proxmox Reboot Update bearbeiten",
+        "description": "Webhook-URL:\n\n`{webhook_url}`\n\nDiese URL muss im Proxmox-Statusskript verwendet werden. Hier kannst du außerdem den Proxmox-Neustart-Button ändern.",
         "data": {
           "reboot_button": "Proxmox-Neustart-Button"
         }
       }
-    },
-    "abort": {
-      "reconfigure_successful": "Die Neukonfiguration war erfolgreich. Webhook-URL:\n\n`{webhook_url}`",
-      "setup_error": "Der Einrichtungsstatus ging verloren. Bitte starte die Einrichtung erneut."
     }
   },
   "entity": {

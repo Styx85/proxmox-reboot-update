@@ -39,7 +39,10 @@ class ProxmoxRebootUpdate(UpdateEntity):
         """Initialize the entity."""
         self.hass = hass
         self._entry = entry
-        self._reboot_button = entry.data[CONF_REBOOT_BUTTON]
+        self._reboot_button = entry.options.get(
+            CONF_REBOOT_BUTTON,
+            entry.data[CONF_REBOOT_BUTTON],
+        )
 
         self.device_entry = async_entity_id_to_device(
             hass,
