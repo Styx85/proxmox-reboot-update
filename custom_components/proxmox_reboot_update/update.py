@@ -3,6 +3,7 @@
 from homeassistant.components.update import UpdateEntity, UpdateEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.device import async_entity_id_to_device
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_track_state_change_event
 
@@ -38,18 +39,24 @@ class ProxmoxRebootUpdate(UpdateEntity):
     _attr_should_poll = False
     _attr_supported_features = UpdateEntityFeature.INSTALL
 
-    def __init__(
-        self,
-        hass: HomeAssistant,
-        source_entity: str,
-        reboot_button: str,
-    ) -> None:
-        """Initialize the entity."""
-        self.hass = hass
-        self._source_entity = source_entity
-        self._reboot_button = reboot_button
-        self._required = False
-        self._source_available = False
+def __init__(
+    self,
+    hass: HomeAssistant,
+    source_entity: str,
+    reboot_button: str,
+) -> None:
+    """Initialize the entity."""
+    self.hass = hass
+    self._source_entity = source_entity
+    self._reboot_button = reboot_button
+
+    self.device_entry = async_entity_id_to_device(
+        hass,
+        reboot_button,
+    )
+
+    self._required = False
+    self._source_available = False
 
     async def async_added_to_hass(self) -> None:
         """Register the source-state listener."""
