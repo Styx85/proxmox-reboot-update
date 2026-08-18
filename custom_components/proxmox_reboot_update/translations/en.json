@@ -11,7 +11,7 @@
       },
       "webhook": {
         "title": "Proxmox webhook",
-        "description": "Configure the Proxmox status script to POST to:\n\n`{webhook_url}`\n\nThe JSON body must be `{\"required\": true}` or `{\"required\": false}`. Submit to finish setup."
+        "description": "Configure the Proxmox status script to POST to:\n\n`{webhook_url}`\n\nSend the reboot-required state as JSON with the boolean field `required`. Submit to finish setup."
       },
       "reconfigure": {
         "title": "Reconfigure Proxmox Reboot Update",
