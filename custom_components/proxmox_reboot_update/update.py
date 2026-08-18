@@ -29,7 +29,8 @@ async def async_setup_entry(
 class ProxmoxRebootUpdate(UpdateEntity):
     """Expose a pending Proxmox reboot as a Home Assistant update."""
 
-    _attr_name = "Proxmox Neustart erforderlich"
+    _attr_translation_key = "reboot_required"
+    _attr_has_entity_name = True
     _attr_unique_id = "proxmox_reboot_required_update"
     _attr_title = "Proxmox VE"
     _attr_icon = "mdi:restart-alert"
@@ -78,11 +79,7 @@ class ProxmoxRebootUpdate(UpdateEntity):
             state is not None
             and state.state not in ("unknown", "unavailable")
         )
-
-        self._required = (
-            self._source_available
-            and state.state == "on"
-        )
+        self._required = self._source_available and state.state == "on"
 
     @property
     def available(self) -> bool:
@@ -91,28 +88,18 @@ class ProxmoxRebootUpdate(UpdateEntity):
 
     @property
     def installed_version(self) -> str:
-        """Return the current pseudo-version."""
-        return "Update installiert" if self._required else "Aktuell"
+        """Return a language-neutral state token."""
+        return "current"
 
     @property
     def latest_version(self) -> str:
-        """Return the target pseudo-version."""
-        return "Neustart erforderlich" if self._required else "Aktuell"
+        """Return a language-neutral state token."""
+        return "reboot_required" if self._required else "current"
 
     @property
-    def release_summary(self) -> str:
-        """Describe the pending action."""
-        if self._required:
-            return (
-                "Proxmox wurde automatisch aktualisiert. "
-                "Ein Neustart des Hosts ist erforderlich. "
-                "Beim Neustart werden laufende virtuelle Maschinen und "
-                "Container geordnet beendet. Der Host und die darauf "
-                "laufenden Dienste können für mehrere Minuten nicht "
-                "erreichbar sein."
-            )
-
-        return "Kein Neustart erforderlich."
+    def release_summary(self) -> str | None:
+        """Return a language-neutral warning token while a reboot is pending."""
+        return "reboot_warning" if self._required else None
 
     def version_is_newer(
         self,

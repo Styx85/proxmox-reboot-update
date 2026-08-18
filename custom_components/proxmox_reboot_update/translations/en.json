@@ -1,0 +1,40 @@
+{
+  "title": "Proxmox Reboot Update",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Proxmox Reboot Update",
+        "description": "Select the helper that reports whether the Proxmox host requires a reboot and the real Proxmox reboot button.",
+        "data": {
+          "source_entity": "Reboot status",
+          "reboot_button": "Proxmox reboot button"
+        }
+      }
+    }
+  },
+  "entity": {
+    "update": {
+      "reboot_required": {
+        "name": "Reboot required",
+        "state_attributes": {
+          "installed_version": {
+            "state": {
+              "current": "Update installed"
+            }
+          },
+          "latest_version": {
+            "state": {
+              "current": "Current",
+              "reboot_required": "Reboot required"
+            }
+          },
+          "release_summary": {
+            "state": {
+              "reboot_warning": "Proxmox was updated automatically. A host reboot is required. Running virtual machines and containers are shut down in an orderly manner. The host and services running on it may be unavailable for several minutes."
+            }
+          }
+        }
+      }
+    }
+  }
+}

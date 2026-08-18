@@ -4,10 +4,35 @@
     "step": {
       "user": {
         "title": "Proxmox Reboot Update",
-        "description": "Wähle den Helfer für den Reboot-Status und den echten Proxmox-Reboot-Button.",
+        "description": "Wähle den Helfer, der meldet, ob der Proxmox-Host neu gestartet werden muss, und den echten Proxmox-Neustart-Button.",
         "data": {
-          "source_entity": "Reboot-Status",
-          "reboot_button": "Proxmox-Reboot-Button"
+          "source_entity": "Neustart-Status",
+          "reboot_button": "Proxmox-Neustart-Button"
+        }
+      }
+    }
+  },
+  "entity": {
+    "update": {
+      "reboot_required": {
+        "name": "Neustart erforderlich",
+        "state_attributes": {
+          "installed_version": {
+            "state": {
+              "current": "Update installiert"
+            }
+          },
+          "latest_version": {
+            "state": {
+              "current": "Aktuell",
+              "reboot_required": "Neustart erforderlich"
+            }
+          },
+          "release_summary": {
+            "state": {
+              "reboot_warning": "Proxmox wurde automatisch aktualisiert. Ein Neustart des Hosts ist erforderlich. Laufende virtuelle Maschinen und Container werden geordnet beendet. Der Host und die darauf laufenden Dienste können für mehrere Minuten nicht erreichbar sein."
+            }
+          }
         }
       }
     }

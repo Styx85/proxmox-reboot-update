@@ -1,7 +1,9 @@
 {
   "domain": "proxmox_reboot_update",
   "name": "Proxmox Reboot Update",
-  "codeowners": ["@Styx85"],
+  "codeowners": [
+    "@Styx85"
+  ],
   "config_flow": true,
   "documentation": "https://github.com/Styx85/proxmox-reboot-update",
   "integration_type": "helper",
