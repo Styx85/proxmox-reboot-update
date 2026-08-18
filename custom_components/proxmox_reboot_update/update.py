@@ -39,24 +39,24 @@ class ProxmoxRebootUpdate(UpdateEntity):
     _attr_should_poll = False
     _attr_supported_features = UpdateEntityFeature.INSTALL
 
-def __init__(
-    self,
-    hass: HomeAssistant,
-    source_entity: str,
-    reboot_button: str,
-) -> None:
-    """Initialize the entity."""
-    self.hass = hass
-    self._source_entity = source_entity
-    self._reboot_button = reboot_button
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        source_entity: str,
+        reboot_button: str,
+    ) -> None:
+        """Initialize the entity."""
+        self.hass = hass
+        self._source_entity = source_entity
+        self._reboot_button = reboot_button
 
-    self.device_entry = async_entity_id_to_device(
-        hass,
-        reboot_button,
-    )
+        self.device_entry = async_entity_id_to_device(
+            hass,
+            reboot_button,
+        )
 
-    self._required = False
-    self._source_available = False
+        self._required = False
+        self._source_available = False
 
     async def async_added_to_hass(self) -> None:
         """Register the source-state listener."""
@@ -86,7 +86,11 @@ def __init__(
             state is not None
             and state.state not in ("unknown", "unavailable")
         )
-        self._required = self._source_available and state.state == "on"
+
+        self._required = (
+            self._source_available
+            and state.state == "on"
+        )
 
     @property
     def available(self) -> bool:
@@ -105,7 +109,7 @@ def __init__(
 
     @property
     def release_summary(self) -> str | None:
-        """Return a language-neutral warning token while a reboot is pending."""
+        """Return a warning token while a reboot is pending."""
         return "reboot_warning" if self._required else None
 
     def version_is_newer(
@@ -129,6 +133,8 @@ def __init__(
         await self.hass.services.async_call(
             "button",
             "press",
-            {"entity_id": self._reboot_button},
+            {
+                "entity_id": self._reboot_button,
+            },
             blocking=True,
         )
