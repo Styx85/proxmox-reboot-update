@@ -1,0 +1,12 @@
+{
+  "domain": "proxmox_reboot_update",
+  "name": "Proxmox Reboot Update",
+  "version": "1.0.0",
+  "config_flow": true,
+  "single_config_entry": true,
+  "integration_type": "helper",
+  "documentation": "https://github.com/Styx85/proxmox-reboot-update",
+  "issue_tracker": "https://github.com/Styx85/proxmox-reboot-update/issues",
+  "codeowners": ["@Styx85"],
+  "requirements": []
+}
