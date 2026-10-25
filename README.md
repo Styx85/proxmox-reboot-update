@@ -4,6 +4,12 @@
 
 # Proxmox Reboot Update
 
+> [!IMPORTANT]
+> **This project has been replaced by [Proxmox Host Monitor](https://github.com/Styx85/proxmox-host-monitor)** and is no longer developed.
+> Proxmox Host Monitor adds disk health monitoring and installs the host scripts from Home Assistant.
+> Its setup imports your Proxmox Reboot Update configuration, including the reboot button, the webhook and the update entity with its history.
+> Version 1.3.0 shows a repair notice pointing to the successor.
+
 Home Assistant helper integration that exposes a pending Proxmox VE host reboot as a normal `update` entity.
 
 ## What it does
@@ -37,7 +43,11 @@ Use the following content and replace `GENERATED_ID` with the webhook URL shown 
 
 HA_WEBHOOK_URL="http://homeassistant.example:8123/api/webhook/GENERATED_ID"
 
-if [ -f /var/run/reboot-required ]; then
+# Proxmox VE does not create /var/run/reboot-required by itself.
+# A newer installed kernel than the running one also requires a reboot.
+NEWEST_KERNEL=$(ls /boot/vmlinuz-*-pve 2>/dev/null | sed 's|/boot/vmlinuz-||' | sort -V | tail -n 1)
+
+if [ -f /var/run/reboot-required ] || { [ -n "$NEWEST_KERNEL" ] && [ "$NEWEST_KERNEL" != "$(uname -r)" ]; }; then
     REQUIRED=true
 else
     REQUIRED=false
@@ -135,6 +145,15 @@ The Proxmox host will now report its reboot status to Home Assistant every five 
 - If the selected reboot button disappears or is no longer provided by its integration, a repair issue appears under **Settings → System → Repairs**. It lets you select a new button directly.
 
 The Proxmox VE integration only creates node reboot buttons if its Proxmox user or API token has the `Sys.PowerMgmt` privilege on the node.
+
+Example for a dedicated user `ha-monitor@pve`:
+
+```bash
+pveum role add HAMonitor -privs "Sys.Audit,VM.Audit,Datastore.Audit,Sys.PowerMgmt,VM.PowerMgmt,VM.Snapshot"
+pveum acl modify / -user ha-monitor@pve -role HAMonitor
+```
+
+Note: an ACL on a deeper path such as `/nodes/<node>` replaces the privileges inherited from `/` for the same user. If you add a node-specific role there (for example `Sys.Modify` for the Proxmox VE package update entity), assign `HAMonitor` on that path as well.
 
 ## Testing
 

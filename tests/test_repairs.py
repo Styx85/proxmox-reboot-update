@@ -112,3 +112,22 @@ async def test_repair_flow_without_entry(hass: HomeAssistant):
     result = await flow.async_step_init()
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "entry_not_found"
+
+
+async def test_replaced_notice(hass: HomeAssistant):
+    """A repair notice points to Proxmox Host Monitor and leaves with the entry."""
+    from custom_components.proxmox_reboot_update.const import ISSUE_REPLACED
+
+    hass.states.async_set(BUTTON, "unknown")
+    entry = await _setup(hass)
+    issue = ir.async_get(hass).async_get_issue(DOMAIN, ISSUE_REPLACED)
+    assert issue is not None
+    assert not issue.is_fixable
+    assert issue.learn_more_url == "https://github.com/Styx85/proxmox-host-monitor"
+    assert issue.translation_placeholders == {
+        "successor_url": "https://github.com/Styx85/proxmox-host-monitor"
+    }
+
+    await hass.config_entries.async_remove(entry.entry_id)
+    await hass.async_block_till_done()
+    assert ir.async_get(hass).async_get_issue(DOMAIN, ISSUE_REPLACED) is None
