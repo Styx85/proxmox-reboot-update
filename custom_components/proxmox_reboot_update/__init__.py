@@ -18,8 +18,10 @@ from .const import (
     CONF_WEBHOOK_ID,
     DOMAIN,
     ISSUE_REBOOT_BUTTON_UNAVAILABLE,
+    ISSUE_REPLACED,
     LEGACY_CONF_SOURCE_ENTITY,
     SIGNAL_REBOOT_STATUS,
+    SUCCESSOR_URL,
 )
 
 PLATFORMS = [Platform.UPDATE]
@@ -55,6 +57,19 @@ async def async_setup_entry(
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     async_setup_button_monitor(hass, entry)
+
+    # Proxmox Reboot Update is no longer developed; point to its successor,
+    # which imports this configuration during its setup.
+    ir.async_create_issue(
+        hass,
+        DOMAIN,
+        ISSUE_REPLACED,
+        is_fixable=False,
+        is_persistent=False,
+        severity=ir.IssueSeverity.WARNING,
+        learn_more_url=SUCCESSOR_URL,
+        translation_key=ISSUE_REPLACED,
+    )
     return True
 
 
@@ -75,8 +90,9 @@ async def async_remove_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
 ) -> None:
-    """Remove the repair issue together with the config entry."""
+    """Remove the repair issues together with the config entry."""
     ir.async_delete_issue(hass, DOMAIN, ISSUE_REBOOT_BUTTON_UNAVAILABLE)
+    ir.async_delete_issue(hass, DOMAIN, ISSUE_REPLACED)
 
 
 async def async_migrate_entry(

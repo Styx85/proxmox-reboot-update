@@ -72,6 +72,10 @@
           "entry_not_found": "Proxmox Reboot Update is no longer configured."
         }
       }
+    },
+    "replaced_by_proxmox_host_monitor": {
+      "title": "Proxmox Reboot Update has been replaced by Proxmox Host Monitor",
+      "description": "Proxmox Reboot Update is no longer developed. Its successor **Proxmox Host Monitor** adds disk health monitoring and installs the host scripts from Home Assistant.\n\nInstall Proxmox Host Monitor from HACS (custom repository `https://github.com/Styx85/proxmox-host-monitor`) and add it. Its setup imports this configuration, including the reboot button, the webhook and the update entity with its history. Then uninstall Proxmox Reboot Update."
     }
   },
   "exceptions": {

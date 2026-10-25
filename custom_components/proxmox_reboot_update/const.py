@@ -18,3 +18,6 @@ STATUS_TIMEOUT = timedelta(minutes=15)
 REBOOT_TIMEOUT = timedelta(minutes=30)
 
 ISSUE_REBOOT_BUTTON_UNAVAILABLE = "reboot_button_unavailable"
+
+ISSUE_REPLACED = "replaced_by_proxmox_host_monitor"
+SUCCESSOR_URL = "https://github.com/Styx85/proxmox-host-monitor"

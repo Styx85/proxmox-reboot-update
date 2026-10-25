@@ -4,6 +4,12 @@
 
 # Proxmox Reboot Update
 
+> [!IMPORTANT]
+> **This project has been replaced by [Proxmox Host Monitor](https://github.com/Styx85/proxmox-host-monitor)** and is no longer developed.
+> Proxmox Host Monitor adds disk health monitoring and installs the host scripts from Home Assistant.
+> Its setup imports your Proxmox Reboot Update configuration, including the reboot button, the webhook and the update entity with its history.
+> Version 1.3.0 shows a repair notice pointing to the successor.
+
 Home Assistant helper integration that exposes a pending Proxmox VE host reboot as a normal `update` entity.
 
 ## What it does
