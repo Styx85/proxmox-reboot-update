@@ -69,6 +69,7 @@ async def async_setup_entry(
         severity=ir.IssueSeverity.WARNING,
         learn_more_url=SUCCESSOR_URL,
         translation_key=ISSUE_REPLACED,
+        translation_placeholders={"successor_url": SUCCESSOR_URL},
     )
     return True
 

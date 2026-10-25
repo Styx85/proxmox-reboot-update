@@ -124,6 +124,9 @@ async def test_replaced_notice(hass: HomeAssistant):
     assert issue is not None
     assert not issue.is_fixable
     assert issue.learn_more_url == "https://github.com/Styx85/proxmox-host-monitor"
+    assert issue.translation_placeholders == {
+        "successor_url": "https://github.com/Styx85/proxmox-host-monitor"
+    }
 
     await hass.config_entries.async_remove(entry.entry_id)
     await hass.async_block_till_done()
